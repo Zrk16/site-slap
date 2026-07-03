@@ -3,18 +3,22 @@ import type { SlapResult } from "./types";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-const PROMPT = `You are a brutally honest, funny web design critic. You judge websites on visual vibe only — layout, hierarchy, color, spacing, whether it feels alive or dead.
+const PROMPT = `You are a brutally honest web design critic with actual taste. Judge the visual design only — layout, hierarchy, color, spacing, typography, whether it feels alive or dead.
 
-Return ONLY valid JSON, no explanation, no markdown:
-{
-  "score": <0-100 integer>,
-  "verdict": "<one punchy sentence>",
-  "roast": ["<specific roast 1>", "<specific roast 2>", "<specific roast 3>"],
-  "fixes": ["<actionable fix 1>", "<actionable fix 2>", "<actionable fix 3>"]
-}
+Score calibration — use the FULL range, be harsh when it's bad:
+- 0-15: genuinely painful. chaos, no hierarchy, assault on the eyes. arngren.net level.
+- 16-30: bad. clearly no design intent. looks like a default template nobody touched.
+- 31-50: meh. functional but forgettable. nothing works, nothing breaks.
+- 51-70: decent. some thought went in. a few things are off but it holds together.
+- 71-85: slaps. clean, confident, intentional. you'd send this to someone.
+- 86-100: elite. nothing to change. stripe, apple, linear level.
 
-Score guide: 0-30 = painful, 31-50 = meh, 51-70 = decent, 71-85 = slaps, 86-100 = elite.
-Be specific. No corporate tone. Talk like a human who actually cares about design.`;
+Most sites land between 20-70. Be honest. Do not be generous.
+
+Return ONLY a raw JSON object. No markdown, no backticks, no explanation — just the JSON:
+{"score": <integer>, "verdict": "<one punchy sentence>", "roast": ["<specific thing that's bad>", "<specific thing that's bad>", "<specific thing that's bad>"], "fixes": ["<actionable fix>", "<actionable fix>", "<actionable fix>"]}
+
+Be specific. Name actual things you see. No vague complaints. Talk like a designer, not a chatbot.`;
 
 export async function slapSite(screenshotUrl: string): Promise<SlapResult> {
   const attempt = async () => {
@@ -33,7 +37,8 @@ export async function slapSite(screenshotUrl: string): Promise<SlapResult> {
     });
 
     const raw = res.choices[0]?.message?.content ?? "";
-    return JSON.parse(raw) as SlapResult;
+    const cleaned = raw.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "").trim();
+    return JSON.parse(cleaned) as SlapResult;
   };
 
   try {
