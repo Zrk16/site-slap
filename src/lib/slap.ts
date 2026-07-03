@@ -13,7 +13,7 @@ Score calibration — use the FULL range, be harsh when it's bad:
 - 71-85: slaps. clean, confident, intentional. you'd send this to someone.
 - 86-100: elite. nothing to change. stripe, apple, linear level.
 
-Most sites land between 20-70. Be honest. Do not be generous.
+Most sites land between 20-70. Be honest. Do not be generous. Minimal design with no clear visual identity, custom typography, or intentional color choices scores 40-55, not 80+. Blank is not the same as clean.
 
 Return ONLY a raw JSON object. No markdown, no backticks, no explanation — just the JSON:
 {"score": <integer>, "verdict": "<one punchy sentence>", "roast": ["<specific thing that's bad>", "<specific thing that's bad>", "<specific thing that's bad>"], "fixes": ["<actionable fix>", "<actionable fix>", "<actionable fix>"]}
