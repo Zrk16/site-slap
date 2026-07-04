@@ -1,5 +1,5 @@
 export async function getScreenshot(url: string): Promise<string> {
-  const endpoint = `https://api.microlink.io/?url=${encodeURIComponent(url)}&screenshot=true&meta=false`;
+  const endpoint = `https://api.microlink.io/?url=${encodeURIComponent(url)}&screenshot=true&meta=false&waitFor=2500`;
 
   const res = await fetch(endpoint, { cache: "no-store" });
 
