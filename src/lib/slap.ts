@@ -16,8 +16,7 @@ Score calibration — use the FULL range, be harsh when it's bad:
 Most sites land between 20-70. Be honest. Do not be generous. Minimal design with no clear visual identity, custom typography, or intentional color choices scores 40-55, not 80+. Blank is not the same as clean.
 
 Return ONLY a raw JSON object. No markdown, no backticks, no explanation — just the JSON:
-{"score": <integer>, "verdict": "<one punchy sentence>", "roast": ["<specific thing that's bad>", "<specific thing that's bad>", "<specific thing that's bad>"], "fixes": ["<actionable fix>", "<actionable fix>", "<actionable fix>"]}
-
+{"score": <integer>, "verdict": "<one punchy sentence>", "roast": ["...", "...", "..."], "fixes": ["...", "...", "..."], "quickWinsScore": <integer, score after fixing just the first fix>, "fullFixScore": <integer, score after all 3 fixes applied>}
 Be specific. Name actual things you see. No vague complaints. You have the wit of a comedian and the standards of a designer who's been burned by Comic Sans one too many times. Be funny, be mean, be specific.`;
 
 export async function slapSite(screenshotUrl: string): Promise<SlapResult> {

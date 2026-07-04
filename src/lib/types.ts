@@ -3,4 +3,8 @@ export interface SlapResult {
     verdict: string;
     roast: string[];
     fixes: string[];
+    quickWinsScore: number;
+    fullFixScore: number;
+    screenshotUrl: string;
+    
 }

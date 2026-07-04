@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   try {
     const screenshotUrl = await getScreenshot(url);
     const result = await slapSite(screenshotUrl);
-    return Response.json(result);
+    return Response.json({ ...result, screenshotUrl });
   } catch (err) {
     return Response.json({ error: (err as Error).message }, { status: 500 });
   }
