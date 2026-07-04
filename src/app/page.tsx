@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import styles from "./decent.module.css";
+
 
 interface SlapResult {
   score: number;
@@ -144,6 +146,122 @@ function BasicSkin({ result, loading, error, url, setUrl, slap, activeTab, setAc
   );
 }
 
+
+function DecentSkin({ result, loading, error, url, setUrl, slap, activeTab, setActiveTab }: {
+  result: SlapResult | null;
+  loading: boolean;
+  error: string;
+  url: string;
+  setUrl: (v: string) => void;
+  slap: () => void;
+  activeTab: ScoreTab;
+  setActiveTab: (t: ScoreTab) => void;
+}) {
+  const tabScore = result
+    ? activeTab === "OG" ? result.score
+    : activeTab === "Quick Fix" ? result.quickWinsScore
+    : result.fullFixScore
+    : null;
+
+  const scoreColor = tabScore === null ? "#0a0a0a"
+    : tabScore >= 71 ? "#16a34a"
+    : tabScore >= 51 ? "#d97706"
+    : "#dc2626";
+
+  const fixes = activeTab === "OG" ? result?.fixes
+    : activeTab === "Quick Fix" ? [result?.fixes[0]]
+    : result?.fixes;
+
+  return (
+    <div className={styles.container}>
+      <p className={styles.eyebrow}>Site Analysis</p>
+      <h1 className={styles.title}>Site Slap</h1>
+      <p className={styles.subtitle}>Does your site slap? Paste a URL and find out.</p>
+
+      <div className={styles.inputRow}>
+        <input
+          type="text"
+          placeholder="https://yoursite.com"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && slap()}
+          className={styles.input}
+        />
+        <button onClick={slap} disabled={loading || !url} className={styles.button}>
+          {loading ? "Analyzing..." : "Slap It"}
+        </button>
+      </div>
+
+      {error && <div className={styles.error}>{error}</div>}
+
+      {loading && (
+        <div style={{ marginTop: 28 }}>
+          {[[320, "100%"], [86, 120], [18, "50%"], [14, "78%"], [14, "65%"], [14, "71%"], [14, "60%"], [14, "74%"]].map(([h, w], i) => (
+            <div key={i} className={styles.skeleton} style={{ height: h, width: w }} />
+          ))}
+        </div>
+      )}
+
+      {!loading && result && (
+        <div className={styles.results}>
+          <div className={styles.scoreSection}>
+            <div className={styles.scoreValue} style={{ color: scoreColor }}>
+              {tabScore}<span className={styles.scoreUnit}>/100</span>
+            </div>
+            <p className={styles.verdict}>{result.verdict}</p>
+          </div>
+
+          <div className={styles.tabs}>
+            {scoreTabs.map((tab) => {
+              const score = tab === "OG" ? result.score : tab === "Quick Fix" ? result.quickWinsScore : result.fullFixScore;
+              return (
+                <button key={tab} onClick={() => setActiveTab(tab)}
+                  className={`${styles.tab} ${activeTab === tab ? styles.tabActive : ""}`}>
+                  {tab} · {score}
+                </button>
+              );
+            })}
+          </div>
+
+          {result.screenshotUrl && (
+            <img src={result.screenshotUrl} alt="screenshot" className={styles.screenshot} />
+          )}
+
+          {activeTab === "OG" && (
+            <div className={styles.section}>
+              <div className={styles.sectionLabel}>Roast</div>
+              <ul className={styles.list}>
+                {result.roast.map((r, i) => (
+                  <li key={i} className={styles.listItem}>
+                    <span className={styles.listNum}>{i + 1}</span>
+                    <span>{r}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className={styles.section}>
+            <div className={styles.sectionLabel}>
+              {activeTab === "OG" ? "Fixes" : activeTab === "Quick Fix" ? "Apply This Fix" : "Apply All Fixes"}
+            </div>
+            <ul className={styles.list}>
+              {fixes?.map((f, i) => (
+                <li key={i} className={styles.listItem}>
+                  <span className={styles.listNum}>{i + 1}</span>
+                  <span>{f}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+
 export default function Home() {
   const [url, setUrl] = useState("");
   const [result, setResult] = useState<SlapResult | null>(null);
@@ -211,7 +329,9 @@ export default function Home() {
                 activeTab={activeTab} setActiveTab={setActiveTab} />
             )}
             {activeSkin === "decent" && (
-              <div style={{ padding: 40, fontFamily: "monospace", opacity: 0.4 }}>decent skin coming soon</div>
+              <DecentSkin result={result} loading={loading} error={error}
+                url={url} setUrl={setUrl} slap={slap}
+                activeTab={activeTab} setActiveTab={setActiveTab} />
             )}
             {activeSkin === "fire" && (
               <div style={{ padding: 40, fontFamily: "monospace", opacity: 0.4 }}>fire skin coming soon</div>
