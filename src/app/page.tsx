@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import styles from "./decent.module.css";
 import fire from "./fire.module.css";
-
+import { useState, useEffect, useRef } from "react";
 
 interface SlapResult {
   score: number;
@@ -261,16 +260,76 @@ function DecentSkin({ result, loading, error, url, setUrl, slap, activeTab, setA
   );
 }
 
-function FireSkin({ result, loading, error, url, setUrl, slap }: {
+function FireSkin({ result, loading, error, url, setUrl, slap, activeTab, setActiveTab }: {
   result: SlapResult | null;
   loading: boolean;
   error: string;
   url: string;
   setUrl: (v: string) => void;
   slap: () => void;
+  activeTab: ScoreTab;
+  setActiveTab: (t: ScoreTab) => void;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLElement>(null);
+  const [displayScore, setDisplayScore] = useState(0);
+
+  const tabScore = result
+    ? activeTab === "OG" ? result.score
+    : activeTab === "Quick Fix" ? result.quickWinsScore
+    : result.fullFixScore
+    : 0;
+
+  const scoreColor = tabScore >= 71 ? "#8fd8c6" : tabScore >= 51 ? "#e6b87d" : "#e08a7a";
+
+  const fixes = !result ? []
+    : activeTab === "Quick Fix" ? [result.fixes[0]]
+    : result.fixes;
+
+  // moment 2: score count-up
+  useEffect(() => {
+    if (!result) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setDisplayScore(tabScore);
+      return;
+    }
+    let raf = 0;
+    const start = performance.now();
+    const duration = 1100;
+    const tick = (now: number) => {
+      const t = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setDisplayScore(Math.round(eased * tabScore));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [result, tabScore]);
+
+  // auto-scroll to results when they land
+  useEffect(() => {
+    if (result) resultsRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [result]);
+
+  // moment 3: staggered reveals on roast/fix items
+  useEffect(() => {
+    if (!result) return;
+    const els = containerRef.current?.querySelectorAll(`.${fire.reveal}`);
+    if (!els?.length) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add(fire.revealIn);
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.2 });
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [result, activeTab]);
+
   return (
-    <div className={fire.container}>
+    <div ref={containerRef} className={fire.container}>
       <section className={fire.hero}>
         <div className={fire.aurora} />
         <div className={fire.vignette} />
@@ -308,10 +367,55 @@ function FireSkin({ result, loading, error, url, setUrl, slap }: {
 
         {loading && <p className={fire.analyzing}>analyzing your site...</p>}
         {error && <p className={fire.error}>{error}</p>}
-        {!loading && result && (
-          <p className={fire.analyzing}>{result.score}/100 — results section lands in chunk 3</p>
-        )}
       </section>
+
+      {!loading && result && (
+        <section ref={resultsRef} className={fire.results}>
+          <div className={fire.scoreBig} style={{ color: scoreColor }}>
+            {displayScore}<span className={fire.scoreUnit}>/100</span>
+          </div>
+          <p className={fire.verdict}>{result.verdict}</p>
+
+          <div className={fire.tabs}>
+            {scoreTabs.map((tab) => (
+              <button key={tab} onClick={() => setActiveTab(tab)}
+                className={`${fire.tab} ${activeTab === tab ? fire.tabActive : ""}`}>
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {result.screenshotUrl && (
+            <div className={fire.frame}>
+              <img src={result.screenshotUrl} alt="site screenshot" />
+            </div>
+          )}
+
+          {activeTab === "OG" && (
+            <div className={fire.section}>
+              <div className={fire.sectionLabel}>The Roast</div>
+              {result.roast.map((r, i) => (
+                <div key={r} className={`${fire.item} ${fire.reveal}`} style={{ transitionDelay: `${i * 0.08}s` }}>
+                  <span className={fire.itemNum}>{String(i + 1).padStart(2, "0")}</span>
+                  <span>{r}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className={fire.section}>
+            <div className={fire.sectionLabel}>
+              {activeTab === "OG" ? "The Fixes" : activeTab === "Quick Fix" ? "Apply This Fix" : "Apply All Fixes"}
+            </div>
+            {fixes.map((f, i) => (
+              <div key={f} className={`${fire.item} ${fire.reveal}`} style={{ transitionDelay: `${i * 0.08}s` }}>
+                <span className={fire.itemNum}>{String(i + 1).padStart(2, "0")}</span>
+                <span>{f}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
@@ -390,7 +494,8 @@ export default function Home() {
             )}
             {activeSkin === "fire" && (
               <FireSkin result={result} loading={loading} error={error}
-                url={url} setUrl={setUrl} slap={slap} />
+                url={url} setUrl={setUrl} slap={slap}
+                activeTab={activeTab} setActiveTab={setActiveTab} />
             )}
           </div>
 
