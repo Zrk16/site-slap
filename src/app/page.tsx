@@ -260,7 +260,86 @@ function DecentSkin({ result, loading, error, url, setUrl, slap, activeTab, setA
   );
 }
 
-function FireSkin({ result, loading, error, url, setUrl, slap, activeTab, setActiveTab }: {
+  function FloatingWindow({ result, upgrades, onClose }: { result: SlapResult; upgrades: { quick?: string; full?: string }; onClose: () => void }) {
+    const winRef = useRef<HTMLDivElement>(null);
+    const pos = useRef({ x: 0, y: 0 });
+    const grab = useRef({ active: false, startX: 0, startY: 0, baseX: 0, baseY: 0 });
+    const [tier, setTier] = useState<"Quick Fix" | "Full Fix">("Quick Fix");
+
+    const tierScore = tier === "Quick Fix" ? result.quickWinsScore : result.fullFixScore;
+    const tierHtml = tier === "Quick Fix" ? upgrades.quick : upgrades.full;
+    const tierColor = tierScore >= 71 ? "#8fd8c6" : tierScore >= 51 ? "#e6b87d" : "#e08a7a";
+
+    function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+      if ((e.target as HTMLElement).closest("button")) return;
+      grab.current = {
+        active: true,
+        startX: e.clientX,
+        startY: e.clientY,
+        baseX: pos.current.x,
+        baseY: pos.current.y,
+      };
+      e.currentTarget.setPointerCapture(e.pointerId);
+    }
+
+    function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+      if (!grab.current.active) return;
+      pos.current = {
+        x: grab.current.baseX + (e.clientX - grab.current.startX),
+        y: grab.current.baseY + (e.clientY - grab.current.startY),
+      };
+      if (winRef.current) {
+        winRef.current.style.transform = `translate(${pos.current.x}px, ${pos.current.y}px)`;
+      }
+    }
+
+    function onPointerUp() {
+      grab.current.active = false;
+    }
+
+    return (
+      <div ref={winRef} className={fire.floatWin}>
+        <div
+          className={fire.floatBar}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+        >
+          <button className={`${fire.floatDot} ${fire.floatClose}`} onClick={onClose} aria-label="Close" />
+          <span className={`${fire.floatDot} ${fire.floatDotDim}`} />
+          <span className={`${fire.floatDot} ${fire.floatDotDim}`} />
+          <span className={fire.floatTitle}>upgraded.site</span>
+        </div>
+
+        <div className={fire.floatBody}>
+          <div className={fire.floatAnchor}>current: {result.score}</div>
+          <div className={fire.floatScore} style={{ color: tierColor }}>
+            {tierScore}
+            <span className={fire.scoreUnit}>/100</span>
+          </div>
+
+          <div className={fire.tabs} style={{ justifyContent: "center" }}>
+            {(["Quick Fix", "Full Fix"] as const).map((t) => (
+              <button key={t} onClick={() => setTier(t)}
+                className={`${fire.tab} ${tier === t ? fire.tabActive : ""}`}>
+                {t === "Quick Fix" ? "Minor Upgrade" : "Full Upgrade"}
+              </button>
+            ))}
+          </div>
+
+          {tierHtml ? (
+            <div className={fire.floatFrameWrap}>
+              <iframe srcDoc={tierHtml} sandbox="" className={fire.floatFrame} title="upgraded site" />
+            </div>
+          ) : (
+            <p className={fire.analyzing}>rendering your upgrade...</p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+function FireSkin({ result, loading, error, url, setUrl, slap, activeTab, setActiveTab, upgrades }: {
   result: SlapResult | null;
   loading: boolean;
   error: string;
@@ -269,10 +348,12 @@ function FireSkin({ result, loading, error, url, setUrl, slap, activeTab, setAct
   slap: () => void;
   activeTab: ScoreTab;
   setActiveTab: (t: ScoreTab) => void;
+  upgrades: { quick?: string; full?: string };
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const resultsRef = useRef<HTMLElement>(null);
   const [displayScore, setDisplayScore] = useState(0);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const tabScore = result
     ? activeTab === "OG" ? result.score
@@ -335,23 +416,23 @@ function FireSkin({ result, loading, error, url, setUrl, slap, activeTab, setAct
         <div className={fire.vignette} />
         <div className={fire.grain} />
 
-        <p className={`${fire.eyebrow} ${fire.rise}`}>New · Vision AI Site Critic</p>
+        <p className={`${fire.eyebrow} ${fire.rise}`} style={{ animationDelay: "1s" }}>New · Vision AI Site Critic</p>
 
         <h1 className={fire.title}>
           {["Does", "Your", "Site"].map((w, i) => (
-            <span key={w} className={fire.word} style={{ animationDelay: `${0.1 + i * 0.09}s` }}>
+            <span key={w} className={fire.word} style={{ animationDelay: `${1.2 + i * 0.15}s` }}>
               {w}&nbsp;
             </span>
           ))}
           <br />
           {["Actually", "Slap?"].map((w, i) => (
-            <span key={w} className={fire.word} style={{ animationDelay: `${0.37 + i * 0.09}s` }}>
+            <span key={w} className={fire.word} style={{ animationDelay: `${1.7 + i * 0.15}s` }}>
               {w}&nbsp;
             </span>
           ))}
         </h1>
 
-        <div className={`${fire.pill} ${fire.rise}`} style={{ animationDelay: "0.65s" }}>
+        <div className={`${fire.pill} ${fire.rise}`} style={{ animationDelay: "2.2s" }}>
           <input
             type="text"
             placeholder="https://yoursite.com"
@@ -370,51 +451,57 @@ function FireSkin({ result, loading, error, url, setUrl, slap, activeTab, setAct
       </section>
 
       {!loading && result && (
-        <section ref={resultsRef} className={fire.results}>
-          <div className={fire.scoreBig} style={{ color: scoreColor }}>
-            {displayScore}<span className={fire.scoreUnit}>/100</span>
-          </div>
-          <p className={fire.verdict}>{result.verdict}</p>
-
-          <div className={fire.tabs}>
-            {scoreTabs.map((tab) => (
-              <button key={tab} onClick={() => setActiveTab(tab)}
-                className={`${fire.tab} ${activeTab === tab ? fire.tabActive : ""}`}>
-                {tab}
-              </button>
-            ))}
-          </div>
+        <>
+          <section ref={resultsRef} className={fire.panel}>
+            <div className={fire.scoreBig} style={{ color: scoreColor }}>
+              {displayScore}<span className={fire.scoreUnit}>/100</span>
+            </div>
+            <p className={fire.verdict}>{result.verdict}</p>
+          </section>
 
           {result.screenshotUrl && (
-            <div className={fire.frame}>
-              <img src={result.screenshotUrl} alt="site screenshot" />
-            </div>
+            <section className={fire.panel}>
+              <div className={fire.frame}>
+                <img src={result.screenshotUrl} alt="site screenshot" />
+              </div>
+            </section>
           )}
 
           {activeTab === "OG" && (
-            <div className={fire.section}>
-              <div className={fire.sectionLabel}>The Roast</div>
-              {result.roast.map((r, i) => (
-                <div key={r} className={`${fire.item} ${fire.reveal}`} style={{ transitionDelay: `${i * 0.08}s` }}>
-                  <span className={fire.itemNum}>{String(i + 1).padStart(2, "0")}</span>
-                  <span>{r}</span>
-                </div>
-              ))}
-            </div>
+            <section className={fire.panel}>
+              <div className={fire.section}>
+                <div className={fire.sectionLabel}>The Roast</div>
+                {result.roast.map((r, i) => (
+                  <div key={r} className={`${fire.item} ${fire.reveal}`} style={{ transitionDelay: `${i * 0.08}s` }}>
+                    <span className={fire.itemNum}>{String(i + 1).padStart(2, "0")}</span>
+                    <span>{r}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
           )}
 
-          <div className={fire.section}>
-            <div className={fire.sectionLabel}>
-              {activeTab === "OG" ? "The Fixes" : activeTab === "Quick Fix" ? "Apply This Fix" : "Apply All Fixes"}
-            </div>
-            {fixes.map((f, i) => (
-              <div key={f} className={`${fire.item} ${fire.reveal}`} style={{ transitionDelay: `${i * 0.08}s` }}>
-                <span className={fire.itemNum}>{String(i + 1).padStart(2, "0")}</span>
-                <span>{f}</span>
+          <section className={fire.panel}>
+            <div className={fire.section}>
+              <div className={fire.sectionLabel}>The Fixes</div>
+              {fixes.map((f, i) => (
+                <div key={f} className={`${fire.item} ${fire.reveal}`} style={{ transitionDelay: `${i * 0.08}s` }}>
+                  <span className={fire.itemNum}>{String(i + 1).padStart(2, "0")}</span>
+                  <span>{f}</span>
+                </div>
+              ))}
+              <div style={{ textAlign: "center" }}>
+                <button className={fire.upgradeBtn} onClick={() => setUpgradeOpen(true)}>
+                  View Upgraded
+                </button>
               </div>
-            ))}
-          </div>
-        </section>
+            </div>
+          </section>
+        </>
+      )}
+
+      {upgradeOpen && result && (
+        <FloatingWindow result={result} upgrades={upgrades} onClose={() => setUpgradeOpen(false)} />
       )}
     </div>
   );
@@ -428,11 +515,32 @@ export default function Home() {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<ScoreTab>("OG");
   const [activeSkin, setActiveSkin] = useState<Skin>("basic");
+  const [seenSkins, setSeenSkins] = useState<Skin[]>(["basic"]);
+  const [upgrades, setUpgrades] = useState<{ quick?: string; full?: string }>({});
+
+  const preloadUpgrades = (data: SlapResult) => {
+    if (!data.screenshotUrl) return;
+    (["quick", "full"] as const).forEach(async (tier) => {
+      try {
+        const res = await fetch("/api/upgrade", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            screenshotUrl: data.screenshotUrl,
+            fixes: tier === "quick" ? [data.fixes[0]] : data.fixes,
+          }),
+        });
+        const d = await res.json();
+        if (res.ok) setUpgrades((u) => ({ ...u, [tier]: d.html }));
+      } catch {}
+    });
+  };
 
   const slap = async () => {
     setLoading(true);
     setError("");
     setResult(null);
+    setUpgrades({});
     setActiveTab("OG");
 
     try {
@@ -443,7 +551,10 @@ export default function Home() {
       });
       const data = await res.json();
       if (!res.ok) setError(data.error ?? "something went wrong");
-      else setResult(data);
+      else {
+        setResult(data);
+        preloadUpgrades(data);
+      }
     } catch {
       setError("request failed");
     } finally {
@@ -458,16 +569,24 @@ export default function Home() {
           0% { background-position: 200% 0; }
           100% { background-position: -200% 0; }
         }
+        @keyframes skinPulse {
+          0%, 100% { opacity: 0.35; }
+          50% { opacity: 1; }
+        }
       `}</style>
       <div style={{ minHeight: "100vh", background: "#0a0a0a", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "60px 20px" }}>
-        <div style={{ width: "100%", maxWidth: activeSkin === "fire" ? 1200 : 800, borderRadius: 12, overflow: "hidden", boxShadow: "0 24px 80px rgba(0,0,0,0.6)", border: "1px solid #2a2a2a", transition: "max-width 0.5s cubic-bezier(0.16, 1, 0.3, 1)" }}>
+        <div style={{ width: "100%", maxWidth: activeSkin === "fire" ? 1200 : 800, borderRadius: 12, overflow: "hidden", boxShadow: "0 24px 80px rgba(0,0,0,0.6)", border: "1px solid #2a2a2a", transition: "max-width 1s cubic-bezier(0.22, 1, 0.36, 1)" }}>
 
           {/* title bar */}
           <div style={{ background: "#1c1c1c", padding: "12px 16px", display: "flex", alignItems: "center", gap: 16, borderBottom: "1px solid #2a2a2a" }}>
             <TrafficLights />
             <div style={{ display: "flex", gap: 2 }}>
               {skins.map((skin) => (
-                <button key={skin} onClick={() => setActiveSkin(skin)} style={{
+                <button key={skin} onClick={() => {
+                  setActiveSkin(skin);
+                  if (!seenSkins.includes(skin)) setSeenSkins([...seenSkins, skin]);
+                }} style={{
+                  position: "relative",
                   padding: "4px 14px", fontSize: 13, border: "1px solid transparent",
                   borderRadius: 6, cursor: "pointer", fontFamily: "monospace",
                   background: activeSkin === skin ? "#2e2e2e" : "transparent",
@@ -475,6 +594,13 @@ export default function Home() {
                   borderColor: activeSkin === skin ? "#3a3a3a" : "transparent",
                 }}>
                   {skin}
+                  {!seenSkins.includes(skin) && (
+                    <span style={{
+                      position: "absolute", top: 3, right: 5, width: 6, height: 6,
+                      borderRadius: "50%", background: skin === "fire" ? "#e6b87d" : "#7dd3c0",
+                      animation: "skinPulse 2s ease-in-out infinite",
+                    }} />
+                  )}
                 </button>
               ))}
             </div>
@@ -495,7 +621,8 @@ export default function Home() {
             {activeSkin === "fire" && (
               <FireSkin result={result} loading={loading} error={error}
                 url={url} setUrl={setUrl} slap={slap}
-                activeTab={activeTab} setActiveTab={setActiveTab} />
+                activeTab={activeTab} setActiveTab={setActiveTab}
+                upgrades={upgrades} />
             )}
           </div>
 

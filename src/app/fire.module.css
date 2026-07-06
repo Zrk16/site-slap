@@ -1,23 +1,23 @@
-
-@import 
-url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600&display=swap');
 
 
 .container {
-  --bg: #0c0e0a;
-  --text: #f5f1e8;
-  --muted: rgba(245, 241, 232, 0.55);
-  --rose: rgba(232, 160, 180, 0.55);
-  --amber: rgba(230, 184, 125, 0.5);
-  --teal: rgba(125, 211, 192, 0.45);
-  --font-display: 'Instrument Serif', Georgia, serif;
-  --font-body: 'Instrument Sans', system-ui, sans-serif;
+    --bg: #0c0e0a;
+    --text: #f5f1e8;
+    --muted: rgba(245, 241, 232, 0.55);
+    --rose: rgba(232, 160, 180, 0.55);
+    --amber: rgba(230, 184, 125, 0.5);
+    --teal: rgba(125, 211, 192, 0.45);
+    --font-display: 'Instrument Serif', Georgia, serif;
+    --font-body: 'Instrument Sans', system-ui, sans-serif;
 
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-body);
-  height: 100%;
-  overflow-y: auto;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    height: 100%;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
 }
 
 .hero {
@@ -28,25 +28,39 @@ url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=I
     align-items: center;
     justify-content: center;
     gap: 26px;
-    padding: 60px 40px; 
+    padding: 60px 40px;
     overflow: hidden;
     text-align: center;
+    scroll-snap-align: start;
 
 
 }
 
-.aurora { 
+.panel {
+    position: relative;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 60px 40px;
+    text-align: center;
+    scroll-snap-align: start;
+}
+
+.aurora {
     position: absolute;
     inset: -20%;
     background:
-    repeating-linear-gradient(100deg,
-      transparent 0%, transparent 6%,
-      var(--rose) 9%, var(--amber) 13%,
-      var(--teal) 18%, transparent 23%),
-    repeating-linear-gradient(100deg,
-      var(--bg) 0%, var(--bg) 4%,
-      transparent 9%, transparent 13%,
-      var(--bg) 17%);
+        repeating-linear-gradient(100deg,
+            transparent 0%, transparent 6%,
+            var(--rose) 9%, var(--amber) 13%,
+            var(--teal) 18%, transparent 23%),
+        repeating-linear-gradient(100deg,
+            var(--bg) 0%, var(--bg) 4%,
+            transparent 9%, transparent 13%,
+            var(--bg) 17%);
     background-size: 300% 200%;
     background-position: 50% 50%;
     filter: blur(42px);
@@ -57,131 +71,198 @@ url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=I
 }
 
 @keyframes auroraDrift {
-    to { background-position: 350% 50%; }
+    to {
+        background-position: 350% 50%;
+    }
 }
 
 .vignette {
     position: absolute;
     inset: 0;
     background: radial-gradient(ellipse 70% 60% at 50% 45%,
-    transparent 0%, rgba(12, 14, 10, 0.55) 70%, var(--bg) 100%);
+            transparent 0%, rgba(12, 14, 10, 0.55) 70%, var(--bg) 100%);
     pointer-events: none;
 }
 
 
 .grain {
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
-  opacity: 0.04;
-  pointer-events: none;
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.04;
+    pointer-events: none;
 }
 
 .eyebrow {
-  position: relative;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: var(--muted);
+    position: relative;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--muted);
 }
 
 .title {
-  position: relative;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 400;
-  font-size: clamp(44px, 6vw, 76px);
-  line-height: 1.08;
-  margin: 0;
+    position: relative;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(44px, 6vw, 76px);
+    line-height: 1.08;
+    margin: 0;
 }
 
 /* ---------- glass pill ---------- */
 
 .pill {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: min(520px, 100%);
-  padding: 8px 8px 8px 22px;
-  border-radius: 999px;
-  border: 1px solid rgba(245, 241, 232, 0.25);
-  background: rgba(245, 241, 232, 0.08);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: min(520px, 100%);
+    padding: 8px 8px 8px 22px;
+    border-radius: 999px;
+    border: 1px solid rgba(245, 241, 232, 0.25);
+    background: rgba(245, 241, 232, 0.08);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
 }
 
 .input {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  outline: none;
-  background: transparent;
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 16px;
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
 }
 
 .input::placeholder {
-  color: var(--muted);
+    color: var(--muted);
 }
 
 .slapBtn {
-  border: none;
-  border-radius: 999px;
-  padding: 12px 26px;
-  font-family: var(--font-body);
-  font-size: 15px;
-  font-weight: 600;
-  background: var(--text);
-  color: var(--bg);
-  cursor: pointer;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    border: none;
+    border-radius: 999px;
+    padding: 12px 26px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 600;
+    background: var(--text);
+    color: var(--bg);
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.slapBtn:hover { transform: scale(1.04); }
-.slapBtn:disabled { opacity: 0.45; cursor: default; transform: none; }
+.slapBtn:hover {
+    transform: scale(1.04);
+}
+
+.slapBtn:disabled {
+    opacity: 0.45;
+    cursor: default;
+    transform: none;
+}
+
+.upgradeBtn {
+    position: relative;
+    border: none;
+    border-radius: 999px;
+    padding: 14px 34px;
+    margin-top: 30px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--text);
+    color: var(--bg);
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+
+
+}
+
+.upgradeBtn:hover {
+    transform: scale(1.04);
+}
+
+.upgradeBtn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    border: 1px solid var(--text);
+    animation: pulseRing 2.4s ease-out infinite;
+
+
+}
+
+@keyframes pulseRing {
+    0% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+
+    70%,
+    100% {
+        transform: scale(1.28);
+        opacity: 0;
+    }
+}
 
 .analyzing {
-  position: relative;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 20px;
-  color: var(--muted);
-  animation: pulse 1.8s ease-in-out infinite;
+    position: relative;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 20px;
+    color: var(--muted);
+    animation: pulse 1.8s ease-in-out infinite;
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
+
+    0%,
+    100% {
+        opacity: 0.4;
+    }
+
+    50% {
+        opacity: 1;
+    }
 }
 
 .error {
-  position: relative;
-  color: #e07a6a;
-  font-size: 15px;
+    position: relative;
+    color: #e07a6a;
+    font-size: 15px;
 }
 
 .word {
     display: inline-block;
     opacity: 0;
     transform: translateY(28px);
-    animation: riseIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: riseIn 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 
 }
 
 .rise {
     opacity: 0;
     transform: translateY(20px);
-    animation: riseIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: riseIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes riseIn {
-    to { opacity: 1; transform: translateY(0); }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 
 
-    
+
 }
 
 
@@ -249,6 +330,7 @@ url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=I
 
 .frame {
     width: 100%;
+    max-width: 880px;
     border: 1px solid rgba(245, 241, 232, 0.18);
     border-radius: 10px;
     overflow: hidden;
@@ -263,7 +345,7 @@ url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=I
 
 .section {
     width: 100%;
-    margin-top: 48px;
+    max-width: 880px;
     text-align: left;
 }
 
@@ -276,7 +358,7 @@ url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=I
     margin-bottom: 22px;
 }
 
-.item { 
+.item {
     display: flex;
     gap: 18px;
     padding: 18px 0;
@@ -298,7 +380,7 @@ url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=I
     opacity: 0;
     transform: translateY(24px);
     transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .revealIn {
@@ -306,8 +388,105 @@ url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=I
     transform: none;
 }
 
+.floatWin {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: min(720px, calc(100vw - 40px));
+    margin: -300px 0 0 -360px;
+    background: #14160f;
+    border: 1px solid rgba(245, 241, 232, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    overflow: hidden;
+
+}
+
+.floatBar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    background: rgba(245, 241, 232, 0.12);
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+
+}
+
+.floatBar:active { cursor: grabbing; }
+
+.floatDot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+
+}
+
+.floatClose { background: #ff5f57; cursor: pointer;}
+.floatDotDim { background: rgba(245, 241, 232, 0.15); }
+
+.floatTitle {
+    margin: 8px;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.floatBody {
+    padding: 26px  26px 30px;
+    text-align: center;
+
+}
+
+.floatAnchor {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+
+}
+
+.floatScore {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 72px;
+    line-height: 1;
+    margin-bottom: 18px;
 
 
+
+}
+
+
+.floatFrameWrap {
+    width: 100%;
+    height: 380px;
+    margin-top: 20px;
+    border: 1px solid rgba(245, 241, 232, 0.18);
+    border-radius: 8px;
+    background: #fff;
+    overflow: hidden;
+}
+
+/* 1280px desktop viewport scaled to the 668px inner width of the 720px window */
+.floatFrame {
+    width: 1280px;
+    height: 728px;
+    border: none;
+    transform: scale(0.522);
+    transform-origin: 0 0;
+}
+
+.floatList {
+    text-align: left;
+    margin-top: 20px;
+}
 
 
 
@@ -315,8 +494,27 @@ url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=I
 
 /* freeze everything for reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .aurora, .analyzing { animation: none; }
-  .word, .rise { animation: none; opacity: 1; transform: none; }
-  .reveal { transition: none; opacity: 1; transform: none; }
-}
 
+    .aurora,
+    .analyzing {
+        animation: none;
+    }
+
+    .upgradeBtn::after {
+        animation: none;
+        opacity: 0;
+    }
+
+    .word,
+    .rise {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+
+    .reveal {
+        transition: none;
+        opacity: 1;
+        transform: none;
+    }
+}
