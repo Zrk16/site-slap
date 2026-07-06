@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import styles from "./decent.module.css";
+import fire from "./fire.module.css";
 
 
 interface SlapResult {
@@ -260,6 +261,60 @@ function DecentSkin({ result, loading, error, url, setUrl, slap, activeTab, setA
   );
 }
 
+function FireSkin({ result, loading, error, url, setUrl, slap }: {
+  result: SlapResult | null;
+  loading: boolean;
+  error: string;
+  url: string;
+  setUrl: (v: string) => void;
+  slap: () => void;
+}) {
+  return (
+    <div className={fire.container}>
+      <section className={fire.hero}>
+        <div className={fire.aurora} />
+        <div className={fire.vignette} />
+        <div className={fire.grain} />
+
+        <p className={`${fire.eyebrow} ${fire.rise}`}>New · Vision AI Site Critic</p>
+
+        <h1 className={fire.title}>
+          {["Does", "Your", "Site"].map((w, i) => (
+            <span key={w} className={fire.word} style={{ animationDelay: `${0.1 + i * 0.09}s` }}>
+              {w}&nbsp;
+            </span>
+          ))}
+          <br />
+          {["Actually", "Slap?"].map((w, i) => (
+            <span key={w} className={fire.word} style={{ animationDelay: `${0.37 + i * 0.09}s` }}>
+              {w}&nbsp;
+            </span>
+          ))}
+        </h1>
+
+        <div className={`${fire.pill} ${fire.rise}`} style={{ animationDelay: "0.65s" }}>
+          <input
+            type="text"
+            placeholder="https://yoursite.com"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && slap()}
+            className={fire.input}
+          />
+          <button onClick={slap} disabled={loading || !url} className={fire.slapBtn}>
+            {loading ? "Slapping" : "Slap It"}
+          </button>
+        </div>
+
+        {loading && <p className={fire.analyzing}>analyzing your site...</p>}
+        {error && <p className={fire.error}>{error}</p>}
+        {!loading && result && (
+          <p className={fire.analyzing}>{result.score}/100 — results section lands in chunk 3</p>
+        )}
+      </section>
+    </div>
+  );
+}
 
 
 export default function Home() {
@@ -301,7 +356,7 @@ export default function Home() {
         }
       `}</style>
       <div style={{ minHeight: "100vh", background: "#0a0a0a", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "60px 20px" }}>
-        <div style={{ width: "100%", maxWidth: 800, borderRadius: 12, overflow: "hidden", boxShadow: "0 24px 80px rgba(0,0,0,0.6)", border: "1px solid #2a2a2a" }}>
+        <div style={{ width: "100%", maxWidth: activeSkin === "fire" ? 1200 : 800, borderRadius: 12, overflow: "hidden", boxShadow: "0 24px 80px rgba(0,0,0,0.6)", border: "1px solid #2a2a2a", transition: "max-width 0.5s cubic-bezier(0.16, 1, 0.3, 1)" }}>
 
           {/* title bar */}
           <div style={{ background: "#1c1c1c", padding: "12px 16px", display: "flex", alignItems: "center", gap: 16, borderBottom: "1px solid #2a2a2a" }}>
@@ -322,7 +377,7 @@ export default function Home() {
           </div>
 
           {/* content */}
-          <div style={{ background: "#000", color: "#fff" }}>
+          <div style={{ background: "#000", color: "#fff", height: activeSkin === "fire" ? "82vh" : "auto" }}>
             {activeSkin === "basic" && (
               <BasicSkin result={result} loading={loading} error={error}
                 url={url} setUrl={setUrl} slap={slap}
@@ -334,7 +389,8 @@ export default function Home() {
                 activeTab={activeTab} setActiveTab={setActiveTab} />
             )}
             {activeSkin === "fire" && (
-              <div style={{ padding: 40, fontFamily: "monospace", opacity: 0.4 }}>fire skin coming soon</div>
+              <FireSkin result={result} loading={loading} error={error}
+                url={url} setUrl={setUrl} slap={slap} />
             )}
           </div>
 
